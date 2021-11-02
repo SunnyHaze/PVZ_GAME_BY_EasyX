@@ -24,6 +24,21 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="EasyXPng.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="welcome.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="loading.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="game.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="pageItem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
