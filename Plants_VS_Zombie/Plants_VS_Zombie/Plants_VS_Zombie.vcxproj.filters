@@ -39,6 +39,9 @@
     <ClInclude Include="pageItem.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="author.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

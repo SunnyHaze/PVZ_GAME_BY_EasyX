@@ -79,6 +79,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="author.h" />
     <ClInclude Include="EasyXPng.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="loading.h" />

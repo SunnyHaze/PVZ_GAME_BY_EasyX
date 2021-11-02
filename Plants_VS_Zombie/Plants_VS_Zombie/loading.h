@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <ctime>
 
+//加载进度界面命名空间
 namespace loading{
 	const int WIDTH = 1024;
 	const int HEIGHT = 768;
@@ -17,14 +18,13 @@ namespace loading{
 	IMAGE background;
 	void startup(){
 		loadimage(&background, _T("\images\\loading_back.png"));
-		;
 	}
 
 	void drawBar(){
 		setfillcolor(GREEN);
 		fillrectangle(WIDTH * 0.1, (HEIGHT * 0.9 - Bar), WIDTH* 0.1 + 0.8 * rate * WIDTH, HEIGHT * 0.9);
 		int i = rand() % 100;
-		float incresement = 0.01;
+		float incresement = 0.03;
 		incresement *= (1.0 * i / 100);
 		rate += incresement;
 		char process[10];

@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <ctime>
 
+//游戏主界面命名空间
 namespace game{
 	IMAGE background;
 	void startup(){

@@ -8,43 +8,31 @@
 #include <vector>
 #include "pageItem.h"
 
-
-namespace welcome{
+//作者详情页命名空间
+namespace author{
 	int * pageControl;
 	Mouse m;
 	// 初始化按钮元件
-	BUTTON butt_start(412, 300, "\images\\buttons\\button_start_");
-	BUTTON butt_exit(412, 500, "\images\\buttons\\button_exit_");
-	BUTTON butt_author(412, 400, "\images\\buttons\\button_author_");
+	BUTTON butt_return(412, 300, "\images\\buttons\\button_return_");
 	IMAGE background;
 	//用于维护按钮的数组
 	std::vector<BUTTON*> vButton;
 	//开始游戏按钮事件
-	void startButtonOnClick(){
-		*pageControl = 1;
+	void returnButtonOnClick(){
+		*pageControl = 0;
 	}
 	//退出游戏按钮事件
-	void exitButtonOnClick(){
-		*pageControl = -1;
-	}
-	void authorButtonOnClick(){
-		*pageControl = 3;
-	}
 	int *pagetmp; //用于在页面与主函数之间传递信息的指针
 	//初始化内容组件
 	void startup(){
 		//按钮原件填入按钮列表
-		vButton.push_back(&butt_start);
-		vButton.push_back(&butt_exit);
-		vButton.push_back(&butt_author);
+		vButton.push_back(&butt_return);
 		//按钮初始化图片
 		for (auto &i : vButton){
 			i->startup();
 		}
 		//绑定按钮事件函数
-		vButton[0]->ButtonEvent = &startButtonOnClick;
-		vButton[1]->ButtonEvent = &exitButtonOnClick;
-		vButton[2]->ButtonEvent = &authorButtonOnClick;
+		vButton[0]->ButtonEvent = &returnButtonOnClick;
 		//读入背景图片
 		loadimage(&background, _T("\images\\welcome_back.png"));
 	}
