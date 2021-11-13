@@ -23,6 +23,7 @@ public:
 			}
 		}
 	}
+
 	bool isInArea(float left, float up, float down, float right){
 		if (right > x && left < x && down > y && up < y){
 			return 1;

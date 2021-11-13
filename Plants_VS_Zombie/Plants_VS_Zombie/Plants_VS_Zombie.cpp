@@ -9,7 +9,7 @@
 #include "game.h"
 #include "author.h"
 int activate_page = 0;
-const int FPS = 120;
+const int FPS = 60;
 void entry(){
 	switch (activate_page)
 	{
