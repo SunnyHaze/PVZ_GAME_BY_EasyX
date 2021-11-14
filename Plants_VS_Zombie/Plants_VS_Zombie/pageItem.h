@@ -11,6 +11,7 @@ public:
 	ExMessage m;
 	float x, y;
 	bool LEFTDOWN = 0;
+	bool RIGHTDOWN = 0;
 	void update(){
 		while (peekmessage(&m, EM_MOUSE)){
 			x = m.x;
@@ -20,6 +21,12 @@ public:
 			}
 			else{
 				LEFTDOWN = 0;
+			}
+			if (m.message == WM_RBUTTONDOWN){
+				RIGHTDOWN = 1;
+			}
+			else{
+				RIGHTDOWN = 0;
 			}
 		}
 	}
