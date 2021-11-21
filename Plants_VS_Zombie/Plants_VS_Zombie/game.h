@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <ctime>
 #include <vector>
+#include <list>
 #include "pageItem.h"
 
 class monster{
@@ -35,7 +36,7 @@ public:
 	int tmpTimer = 0;
 	IMAGE img[8];
 	int animationSize = 8;
-	std::vector<monster> list;
+	std::list<monster> list;
 	std::string img_dir;
 	int maxBlood = 10;
 	List_monster(char imgdir[],int time = 0){
@@ -178,8 +179,94 @@ public:
 		}
 	}
 };
-const int  chessBoard::rowPixY[6] = { 113, 222, 339, 473, 600, 726 };
-const int chessBoard::colPixX[10] = { 40,145,242, 354, 460, 566, 673, 781, 886, 970 };
+
+class sun{
+public:
+	IMAGE *img;
+	float x, y, destx, desty,speed = 2;
+	float width = 80, height = 86;
+	float finalx = 50, finaly = 50;
+	Mouse *m;
+	int status = 0;
+	sun(IMAGE *image, Mouse *mouse){
+		img = image;
+		destx = 100 + rand() % 800;
+		desty = 100 + rand() % 450;
+		x = destx;
+		y = -100;
+		m = mouse;
+	}
+	void draw(){
+		switch (status){
+		case 0:
+			if (m->isInArea(x, y, y + height, x + width) && m->LEFTDOWN){
+				status = 1;
+			}
+			if (y <= desty){
+				y += speed;
+			}
+			putimagePng(x, y, img);
+			break;
+		case 1:
+			if (x <= finalx && y <= finaly){
+				status = 2;
+			}
+			else{
+				int k = 10;
+				x -= speed * (x) / (x + y) * k;
+				y -= speed * (y) / (x + y) * k;
+			}
+			putimagePng(x, y, img);
+			break;
+		default:
+			break;
+		}
+	}
+	bool operator==(sun obj){
+		return status == 2;
+	}
+};
+
+class List_sun{
+public:
+	Mouse *m;
+	IMAGE img;
+	int count = 0;
+	char str_count[8];
+	int time_cnt = 0;
+	int step = 1200;
+	std::list<sun> lst;
+	void startup(){
+		loadimage(&img, "\images\\sun.png");
+	}
+	void sunGenerator(){
+		time_cnt++;
+		if (time_cnt >= step){
+			lst.push_back(sun(&img,m));
+			time_cnt = 0;
+			step = 1000 + rand() % 500;
+		}
+		time_cnt++;
+	}
+	void draw(){
+		sprintf(str_count, "%d", count);
+		setbkmode(TRANSPARENT);
+		settextcolor(BLACK);
+		outtextxy(55, 83, str_count);
+		for (auto &i : lst){
+			i.draw();
+		}
+		for (auto &i : lst){
+
+			if (i.status == 2)
+			{
+				count += 25;
+				lst.remove(i);
+				break;
+			}
+		}
+	}
+};
 
 class statusCounter{
 public:
@@ -188,9 +275,15 @@ public:
 	Mouse m;
 	IMAGE *pointImg;
 	chessBoard *board;
-	statusCounter(cardSlot *cardslot, chessBoard *chessb){
+	List_sun *listSun;
+	statusCounter(cardSlot *cardslot, chessBoard *chessb, List_sun *listofsun){
 		slot = cardslot;
 		board = chessb;
+		listSun = listofsun;
+		//初始化鼠标监听器
+	}
+	void startup(){
+		listSun->m = &m;
 	}
 	void trackStatus(){
 		switch (code)
@@ -230,23 +323,25 @@ public:
 		}
 	}
 };
-
+const int  chessBoard::rowPixY[6] = { 113, 222, 339, 473, 600, 726 };
+const int chessBoard::colPixX[10] = { 40, 145, 242, 354, 460, 566, 673, 781, 886, 970 };
 //游戏主界面命名空间
 namespace game{
 	IMAGE background;
 	List_monster chaoxing("\images\\superstar\\superstar",rand() % 10);
 	List_monster dingding("\images\\dingding\\dingding",rand() % 10);
+	List_sun listSun;
 	cardSlot slotCard;
 	chessBoard board;
-	statusCounter status(&slotCard, &board);
+	statusCounter status(&slotCard, &board, &listSun);
 	void startup(){
 		//加载背景图片
 		loadimage(&background, _T("\images\\background.png"));
-		
 		//加载怪物素材
 		chaoxing.startup();
 		dingding.startup();
-
+		listSun.startup();
+		status.startup();
 		//加载卡槽内容
 		for (int i = 0; i < 9; i++){
 			slotCard.addCard("\images\\card.png", "\images\\plant1.png");
@@ -260,10 +355,12 @@ namespace game{
 	void draw(int *page){
 		status.m.update();
 		putimagePng(0, 0, &background);
-		chaoxing.randomMonsterGenerator();
-		dingding.randomMonsterGenerator();
+		listSun.sunGenerator();
 		slotCard.draw();
 		status.trackStatus();
+		listSun.draw();
+		chaoxing.randomMonsterGenerator();
+		dingding.randomMonsterGenerator();
 		board.draw();
 	}
 }
