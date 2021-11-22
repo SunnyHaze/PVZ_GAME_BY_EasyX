@@ -43,6 +43,7 @@ void startup(){
 
 int main()
 {
+	//初始化时间种子
 	srand(time(NULL));
 	//主要的渲染循环：
 	initgraph(1024, 768, EW_SHOWCONSOLE);
