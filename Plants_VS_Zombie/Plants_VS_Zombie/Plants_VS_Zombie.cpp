@@ -8,7 +8,7 @@
 #include "loading.h"
 #include "game.h"
 #include "author.h"
-int activate_page = 2;
+int activate_page = 0;
 const int FPS = 1200;
 void entry(){
 	switch (activate_page)

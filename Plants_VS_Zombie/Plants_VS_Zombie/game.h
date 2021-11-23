@@ -15,7 +15,6 @@
 #include <functional>
 //用于插入自定义的鼠标类，封装了一些鼠标操作
 #include "pageItem.h"
-
 //怪物类，是一种怪物的基本位置信息和速度信息记录
 class monster{
 public:
@@ -23,7 +22,7 @@ public:
 	int blood = 10;
 	float step = 0.4;
 	float x=1000, y=100;
-	float width, height = 100;
+	float width= 100, height = 100;
 	monster(float inx, float iny){
 		x = inx;
 		y = iny;
@@ -35,69 +34,9 @@ public:
 		return x <= -100 || blood <= 0;
 	}
 };
-//怪物列表，用于管理一种怪物在界面上的渲染和消失
-class List_monster{
-public:
-	const static float rowPixY[5];
-	int fps = 60;
-	long long timer = 0;
-	int tmpTimer = 0;
-	IMAGE img[8];
-	int animationSize = 8;
-	std::list<monster> list;
-	std::string img_dir;
-	int maxBlood = 10;
-	List_monster(char imgdir[],int time = 0){
-		img_dir = std::string(imgdir);
-		timer = time;
-	}
-	void startup(){
-		for (int i = 0; i < animationSize; i++){
-			std::string path = img_dir;
-			path.append("0");
-			path[path.size() - 1] += i;
-			path.append(".png");
-			loadimage(&img[i], _T(path.c_str()));
-		}
-	}
-	void addMonster(int idxRow){
-		list.push_back(monster(1100, rowPixY[idxRow]));
-	}
-	void randomMonsterGenerator(){
-		int separ = 5 + rand() % 4;
-		if (timer % separ == 0 && tmpTimer == 0){
-			addMonster(rand() % 5);
-		}
-		draw();
-	}
 
-	void draw(){
-		tmpTimer++;
-		if (tmpTimer == fps){
-			timer++;
-			tmpTimer = 0;
-		}
-		for (auto &i : list){
-			putimagePng(i.x, i.y, &img[(int)i.cnt]);
-			i.cnt += i.step;
-			if (i.cnt >= animationSize){
-				i.cnt = 0;
-			}
-			i.x--;
-		}
-		for (auto &i : list){
-			if (i.x < -100){
-				list.remove(i);
-				break;
-			}
-			if (i.blood <= 0){
-				list.remove(i);
-				break;
-			}
-		}
-	}
-}; 
-const float List_monster::rowPixY[5] = { 90, 220, 350, 480, 630 }; //确定怪物应该渲染的y轴坐标
+class chessBoard;
+//怪物列表，用于管理一种怪物在界面上的渲染和消失
 
 //卡片位置
 class card{
@@ -106,15 +45,18 @@ public:
 	std::string imgdir;
 	std::string tardir;
 	std::string name;
+	int cardID;
 	float x, y;
-	card(char imgDir[], char targetDir[],float inx,float iny, char cardname[]){
+	card(char imgDir[], char targetDir[],float inx,float iny, char cardname[],int id){
 		x = inx;
 		y = iny;
 		imgdir = std::string(imgDir);
 		tardir = std::string(targetDir);
 		name = std::string(cardname);
+		cardID = id;
 	}
 };
+
 class cardSlot{
 public:
 	const static float cardPosiX[9];
@@ -122,8 +64,8 @@ public:
 	IMAGE target[9];
 	int cnt = 0;
 	std::vector<card> lst;
-	void addCard(char cardPath[], char targetPath[], char plantname[]){
-		lst.push_back(card(cardPath, targetPath,cardPosiX[cnt++],13, plantname));
+	void addCard(char cardPath[], char targetPath[], char plantname[], int ID){
+		lst.push_back(card(cardPath, targetPath,cardPosiX[cnt++],13, plantname,ID));
 	}
 	void startup(){
 		for (int i = 0; i < lst.size(); i++){
@@ -137,15 +79,25 @@ public:
 		}
 	}
 };
-const float cardSlot::cardPosiX[9] = { 120, 190, 260, 330, 400, 470, 540, 610, 680 };//合适的y轴方向是13
 
+class List_bullet;
+const float cardSlot::cardPosiX[9] = { 120, 190, 260, 330, 400, 470, 540, 610, 680 };//合适的y轴方向是13
 class block{
 public:
 	IMAGE img;
 	int status = 0;
 	float left, right, up, down;
+	int cnt = 0;
+	int step = 200;
+	int blood = 10;
 	block(){
 		;
+	}
+	float getCenterX(){
+		return (left + right) / 2;
+	}
+	float getCenterY(){
+		return (up + down) / 2; 
 	}
 	block(float l, float r, float u, float d){
 		left = l;
@@ -157,7 +109,7 @@ public:
 		return x > left &&  x <= right && y > up && y <= down;
 	}
 	void draw(){
-		if (status != 0){
+		if (status >= 1){
 			putimagePng((left + right) / 2 - img.getwidth() / 2, (up + down) / 2 - img.getheight() / 2, &img);
 		}
 	}
@@ -192,14 +144,102 @@ public:
 	bool inBoard(float x, float y){
 		return x < 970 && x > 40 && y < 726 && y > 113;
 	}
-	void clearAll(){
+	void clearAllTrans(){
 		for (int i = 0; i < 5; i++){
 			for (int j = 0; j < 10; j++){
-				data[i][j].status = 0;
+				if (data[i][j].status == 1){
+					data[i][j].status = 0;
+				}
 			}
 		}
 	}
 };
+class List_monster{
+public:
+	const static float rowPixY[5];
+	int fps = 60;
+	long long timer = 0;
+	int tmpTimer = 0;
+	IMAGE img[8];
+	int animationSize = 8;
+	std::list<monster> list;
+	std::string img_dir;
+	int maxBlood = 10;
+	chessBoard *ptrChessboard;
+
+	int biteStep = 10;
+	int biteCount = 0;
+	List_monster(char imgdir[], int time = 0){
+		img_dir = std::string(imgdir);
+		timer = time;
+	}
+	void startup(){
+		for (int i = 0; i < animationSize; i++){
+			std::string path = img_dir;
+			path.append("0");
+			path[path.size() - 1] += i;
+			path.append(".png");
+			loadimage(&img[i], _T(path.c_str()));
+		}
+	}
+	void addMonster(int idxRow){
+		list.push_back(monster(1100, rowPixY[idxRow]));
+	}
+	void randomMonsterGenerator(){
+		int separ = 5 + rand() % 4;
+		if (timer % separ == 0 && tmpTimer == 0){
+			addMonster(rand() % 5);
+		}
+		draw();
+	}
+	bool inDistance(float x1, float y1, float x2, float y2){
+		int R = 50;
+		return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) < R * R;
+	}
+	void draw(){
+		tmpTimer++;
+		if (tmpTimer == fps){
+			timer++;
+			tmpTimer = 0;
+		}
+		for (auto &mons : list){
+			putimagePng(mons.x, mons.y, &img[(int)mons.cnt]);
+			mons.cnt += mons.step;
+			if (mons.cnt >= animationSize){
+				mons.cnt = 0;
+			}
+			bool status = 0;
+			for (auto & j : ptrChessboard->data){
+				for (auto &plant : j){
+					if (plant.status > 1 && inDistance(mons.x + mons.width ,mons.y + mons.height * 0.5, plant.right,(plant.up + plant.down) / 2)){
+						status = 1;
+						biteCount++;
+						if (biteCount == biteStep){
+							plant.blood--;
+							biteCount = 0;
+						}
+					}
+				}
+			}
+			if (!status){
+				mons.x--;
+			}
+		}
+		for (auto &mons : list){
+			if (mons.x < -100){
+				list.remove(mons);
+				break;
+			}
+			if (mons.blood <= 0){
+				list.remove(mons);
+				break;
+			}
+		}
+	}
+};
+const float List_monster::rowPixY[5] = { 90, 220, 350, 480, 630 }; //确定怪物应该渲染的y轴坐标
+
+
 
 class sun{
 public:
@@ -255,7 +295,8 @@ public:
 	int count = 0;
 	char str_count[8];
 	int time_cnt = 0;
-	int step = 1200;
+	int step = 120;
+	int pace = 1200;
 	std::list<sun> lst;
 	void startup(){
 		loadimage(&img, "\images\\sun.png");
@@ -265,7 +306,7 @@ public:
 		if (time_cnt >= step){
 			lst.push_back(sun(&img,m));
 			time_cnt = 0;
-			step = 1000 + rand() % 500;
+			step = pace * 0.8 + rand() % (int)(pace*0.4);
 		}
 		time_cnt++;
 	}
@@ -322,7 +363,8 @@ class List_bullet{
 const static int rowPixY[6];
 public:
 	int cnt = 0;
-	int step = 100;
+	int step = 100; 
+	float width = 58, height = 58;
 	std::list<bullet> mylst;
 	IMAGE img;
 	void addbullet(float x, float y){
@@ -353,35 +395,6 @@ public:
 	}
 };
 const int List_bullet::rowPixY[6] = { 115, 240, 370, 490, 640, 750 };
-//植物类，用于定义植物实体
-class plant{
-	static std::string name;
-	IMAGE *img;
-	float x, y;
-	int cnt = 0;
-	plant(int inx, int iny){
-		x = inx;
-		y = iny;
-	}
-	void draw(){
-		putimagePng(x, y, img);
-		cnt++;
-		//Todo
-	}
-};
-
-//植物表，用于管理所有的植物及其行为
-class List_plant{
-	std::map<std::string, std::function<plant(int,int)>> mpPlant;
-	std::map<std::string, IMAGE> mpImg;
-	void startup(){
-		//太阳花部分
-
-		//豌豆射手部分
-		//mpPlant.insert(std::pair<std::string, std::function<plant(int, int)>>(std::string("pee"), plant()));
-		//mpImg.insert(std::pair<)
-	}
-};
 
 class statusCounter{
 public:
@@ -391,36 +404,73 @@ public:
 	IMAGE *pointImg;
 	chessBoard *board;
 	List_sun *listSun;
-	statusCounter(cardSlot *cardslot, chessBoard *chessb, List_sun *listofsun){
+	List_bullet* listBullet;
+	int selectCardNum = 0;
+	statusCounter(cardSlot *cardslot, chessBoard *chessb, List_sun *listofsun, List_bullet *listBull){
 		slot = cardslot;
 		board = chessb;
 		listSun = listofsun;
+		listBullet = listBull;
 		//初始化鼠标监听器
 	}
 	void startup(){
 		listSun->m = &m;
 	}
+	void shootEvent(){
+		for (auto &i : board->data){
+			for (auto &j : i){
+				if (j.status == 2){
+					j.cnt++;
+					if (j.cnt == j.step){
+						listBullet->addbullet(j.getCenterX()-listBullet->width / 2,j.getCenterY() - listBullet->height / 2);
+						j.cnt = 0;
+					}
+				}
+			}
+		}
+	}
 	void trackStatus(){
+		shootEvent();
+		for (int i = 0; i < 5; i++){
+			for (int j = 0; j < 9; j++){
+				if (board->data[i][j].status == 2 && board->data[i][j].blood <= 0){
+					board->data[i][j].status = 0;
+					board->data[i][j].blood = 10;
+				}
+			}
+		}
 		switch (code)
 		{
+			
+
+		//选择卡片之前
 		case 0:
 			for (int j = 0; j < slot->cnt; j++){
 				card * i = &slot->lst[j];
 				if (m.isInArea(i->x, i->y, i->y + i->height, i->x + i->width) && m.LEFTDOWN){
 					code = 1;
+					selectCardNum = i->cardID;
 					pointImg = &slot->target[j];
 				}
 			}
-			board->clearAll();
+			board->clearAllTrans();
 			break;
+		//虚选卡片时间
 		case 1:
 			if (board->inBoard(m.x, m.y)){
 				for (int i = 0; i < 5; i++){
 					for (int j = 0; j < 10; j++){
 						if (board->data[i][j].isInArea(m.x, m.y)){
-							board->data[i][j].status = 1;
+							if (board->data[i][j].status == 0){
+								board->data[i][j].status = 1;
+							}
+							else if (m.LEFTDOWN){
+								board->data[i][j].status = 2;
+								board->data[i][j].setImage("\images\\plant1.png");
+								code = 0;
+							}
 						}
-						else{
+						else if (board->data[i][j].status < 2){
 							board->data[i][j].status = 0;
 						}
 					}
@@ -428,7 +478,7 @@ public:
 			}
 			else{
 				putimagePng(m.x - slot->target->getwidth() / 2, m.y - slot->target->getheight() / 2, pointImg);
-				board->clearAll();
+				board->clearAllTrans();
 			}
 			if (m.RIGHTDOWN){
 				code = 0;
@@ -458,7 +508,7 @@ public:
 			for (auto &m : i->list){ //j是monsters对象
 				for (auto &b : bull->mylst){
 					//printf("%d%d%d\n", m.y < b.y, m.y + m.height > b.y, b.x + b.width > m.x);
-					if (m.y < b.y && m.y + m.height > b.y && b.x + b.width > m.x){ //m.y < b.y && m.y + m.height > b.y + b.height &&
+					if (m.y < b.y && m.y + m.height > b.y && b.x + b.width > m.x + 20){ //m.y < b.y && m.y + m.height > b.y + b.height &&
 						b.status = 1;
 						m.blood--;
 					}
@@ -475,8 +525,8 @@ namespace game{
 	List_sun listSun;
 	cardSlot slotCard;
 	chessBoard board;
-	statusCounter status(&slotCard, &board, &listSun);
 	List_bullet listBullet;
+	statusCounter status(&slotCard, &board, &listSun, &listBullet);
 	hitEvent hitEvt;
 	void startup(){
 		//加载背景图片
@@ -488,7 +538,7 @@ namespace game{
 		status.startup();
 		//加载卡槽内容
 		for (int i = 0; i < 9; i++){
-			slotCard.addCard("\images\\card.png", "\images\\plant1.png","pea");
+			slotCard.addCard("\images\\card.png", "\images\\plant1.png","pea",1);
 		}
 		slotCard.startup();
 
@@ -500,6 +550,8 @@ namespace game{
 		hitEvt.addMonsterList(&chaoxing);
 		hitEvt.addMonsterList(&dingding);
 		hitEvt.bull = &listBullet;
+		chaoxing.ptrChessboard = &board;
+		dingding.ptrChessboard = &board;
 	}
 
 	void draw(int *page){
@@ -513,7 +565,7 @@ namespace game{
 		dingding.randomMonsterGenerator();
 		board.draw();
 
-		listBullet.testBullet();
+		//listBullet.testBullet();
 		hitEvt.draw();
 		listBullet.draw();
 	}
