@@ -35,9 +35,6 @@ public:
 	}
 };
 
-class chessBoard;
-//怪物列表，用于管理一种怪物在界面上的渲染和消失
-
 //卡片位置
 class card{
 public:

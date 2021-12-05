@@ -4,12 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 #include "welcome.h"
 #include "loading.h"
 #include "game.h"
 #include "author.h"
 int activate_page = 0;
-const int FPS = 1200;
+const int FPS = 60;
 void entry(){
 	switch (activate_page)
 	{
@@ -52,11 +53,16 @@ int main()
 	//主要的渲染循环
 	while (1)
 	{
+		clock_t start = clock();
 		cleardevice();
 		BeginBatchDraw();
 		entry();
 		FlushBatchDraw();
-		Sleep(1000 / FPS);
+		printf("%d\n", start);
+		clock_t current;
+		while ((current = clock() - start ) <= 1000 / FPS){
+			;
+		}
 	}
 	closegraph();
 	return 0;
