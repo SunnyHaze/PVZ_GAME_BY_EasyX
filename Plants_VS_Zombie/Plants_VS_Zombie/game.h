@@ -35,58 +35,99 @@ public:
 	}
 };
 
+class picturesOFcard{ //ÒòÎªEasyXµÄIMAGEÀàµÄ¶ÔÏóÔÚ¿½±´µÄÊ±ºò»á·¢ÉúÖĞ¶Ï£¬ËùÒÔĞèÒªµ¥¶À´¦Àí
+public:
+	IMAGE cardimg;		//¿¨²ÛÖĞÍ¼Æ¬µØÖ·
+	IMAGE img[8];		//Êµ¼ÊäÖÈ¾Í¼Æ¬µØÖ·
+	IMAGE trans_img;	//°ëÍ¸Ã÷Í¼Æ¬µØÖ·
+	std::string imgdir; //¿¨²ÛÖĞµÄ¿¨Æ¬µÄÂ·¾¶
+	std::string tardir; //Ö²ÎïÊµÌåµÄÂ·¾¶
+	int img_cnt_MAX;
+	picturesOFcard(std::string inputImgdir, std::string inputTargetdir, int img_cnt_M){
+		imgdir = inputImgdir;
+		tardir = inputTargetdir;
+		img_cnt_MAX = img_cnt_M;
+	}
+
+	void startup(){
+		loadimage(&cardimg, imgdir.c_str()); // ¶ÁÈë¿¨Æ¬ËØ²Ä
+		for (int i = 0; i < img_cnt_MAX; i++){
+			std::string tmpPath(tardir);
+			tmpPath.append("0");
+			tmpPath[tmpPath.length() - 1] += i + 1;
+			tmpPath.append(".png");
+			loadimage(&img[i], _T(tmpPath.c_str()));
+		}
+		std::string tmp(tardir);
+		loadimage(&trans_img, tmp.append("_trans.png").c_str()); //¶ÁÈë°ëÍ¸Ã÷Í¼Æ¬
+	}
+
+	void drawTransparent(int x, int y){
+		putimagePng(x - trans_img.getwidth() / 2, y - trans_img.getheight() / 2, &trans_img);
+	}
+};
+
+class statusCounter;
 //¿¨Æ¬Î»ÖÃ
 class card{
 public:
 	float width = 63, height = 84;
-	std::string imgdir;
-	std::string tardir;
-	std::string name;
-	int cardID;
 	float x, y;
-	card(char imgDir[], char targetDir[],float inx,float iny, char cardname[],int id){
+	std::string name;   //¿¨Æ¬Ãû
+	int cardID;         //¿¨Æ¬ID
+	picturesOFcard *pics;
+	int blood;			//ÑªÁ¿
+	int cost;			//ÏûºÄÑô¹âÊı
+	void(*action)(statusCounter *obj,int,int);  //******·Ç³£ÖØÒª******ÓÃÓÚ¿ØÖÆÄ³ÖÖÖ²ÎïĞĞÎªµÄº¯ÊıÖ¸Õë£¬ĞèÒª´«Ö¸Õë²ÅÄÜÔË×÷¡£
+	card(picturesOFcard *picsPtr, float inx, float iny, char cardname[], int id, int inputBlood, int inputCost){
+		pics = picsPtr;
 		x = inx;
 		y = iny;
-		imgdir = std::string(imgDir);
-		tardir = std::string(targetDir);
 		name = std::string(cardname);
 		cardID = id;
+		blood = inputBlood;
+		cost = inputCost;
+	}
+
+	void startup(){
+		pics->startup();
 	}
 };
 
 class cardSlot{
 public:
 	const static float cardPosiX[9];
-	IMAGE cards[9];
-	IMAGE target[9];
 	int cnt = 0;
 	std::vector<card> lst;
-	void addCard(char cardPath[], char targetPath[], char plantname[], int ID){
-		lst.push_back(card(cardPath, targetPath,cardPosiX[cnt++],13, plantname,ID));
+	void addCard(picturesOFcard *picsPtr, char plantname[], int ID, int blood, int cost){
+		lst.push_back(card(picsPtr,cardPosiX[cnt++],13, plantname,ID,blood,cost));
 	}
 	void startup(){
 		for (int i = 0; i < lst.size(); i++){
-			loadimage(&cards[i], lst[i].imgdir.c_str());
-			loadimage(&target[i], lst[i].tardir.c_str());
+			lst[i].startup();
 		}
 	}
 	void draw(){
 		for (int i = 0; i < lst.size(); i++){
-			putimagePng(lst[i].x, lst[i].y, &cards[i]);
+			putimagePng(lst[i].x, lst[i].y, &lst[i].pics->cardimg);
 		}
 	}
 };
 
 class List_bullet;
 const float cardSlot::cardPosiX[9] = { 120, 190, 260, 330, 400, 470, 540, 610, 680 };//ºÏÊÊµÄyÖá·½ÏòÊÇ13
+
 class block{
 public:
-	IMAGE img;
-	int status = 0;
-	float left, right, up, down;
-	int cnt = 0;
-	int step = 200;
-	int blood = 10;
+	int status = 0;				//±êÊ¶¿éÏÖÔÚµÄ×´Ì¬£¨0ÊÇÎŞÖ²Îï£¬1ÊÇĞéÖ²Îï£¬2ÊÇÓĞÖ²Îï£©
+	float left, right, up, down; //±ê¶¨blockµÄÎ»ÖÃ
+	int eventCnt = 0;			//¾àÀë´¥·¢ÊÂ¼şµÄ²½Êı
+	int eventStep = 200;		//´¥·¢ÊÂ¼şµÄÖÜÆÚ
+	int bloodNow = 10;			//µ±Ç°ÑªÁ¿
+	int img_cnt = 0;				//µ±Ç°äÖÈ¾µ½µÄÍ¼Æ¬
+	int FPS = 10;
+	int FPS_CNT = 0;
+	card *NowPlant;
 	block(){
 		;
 	}
@@ -96,7 +137,12 @@ public:
 	float getCenterY(){
 		return (up + down) / 2; 
 	}
+	void setPlant(card *cardPtr){
+		NowPlant = cardPtr;
+	}
+
 	block(float l, float r, float u, float d){
+		status = 0;
 		left = l;
 		right = r;
 		up = u;
@@ -106,12 +152,17 @@ public:
 		return x > left &&  x <= right && y > up && y <= down;
 	}
 	void draw(){
-		if (status >= 1){
-			putimagePng((left + right) / 2 - img.getwidth() / 2, (up + down) / 2 - img.getheight() / 2, &img);
+		if (status == 2){
+			putimagePng((left + right) / 2 - NowPlant->pics->img[img_cnt].getwidth() / 2, (up + down) / 2 - NowPlant->pics->img[img_cnt].getheight() / 2, &NowPlant->pics->img[img_cnt]);
+			if (FPS_CNT == FPS){
+				img_cnt++;
+				img_cnt %= NowPlant->pics->img_cnt_MAX;
+				FPS_CNT = 0;
+			}
+			else{
+				FPS_CNT++;
+			}
 		}
-	}
-	void setImage(char path[]){
-		loadimage(&img, _T(path));
 	}
 };
 
@@ -127,7 +178,7 @@ public:
 		for (int i = 0; i < 5; i++){
 			for (int j = 0; j < 9; j++){
 				data[i][j] = block(colPixX[j], colPixX[j + 1], rowPixY[i], rowPixY[i + 1]);
-				data[i][j].setImage("\images\\plant_trans.png");
+			//	data[i][j].setImage("\images\\plant_trans.png");
 			}
 		}
 	}
@@ -212,7 +263,7 @@ public:
 						status = 1;
 						biteCount++;
 						if (biteCount == biteStep){
-							plant.blood--;
+							plant.bloodNow--;
 							biteCount = 0;
 						}
 					}
@@ -241,11 +292,25 @@ const float List_monster::rowPixY[5] = { 90, 220, 350, 480, 630 }; //È·¶¨¹ÖÎïÓ¦¸
 class sun{
 public:
 	IMAGE *img;
-	float x, y, destx, desty,speed = 2;
+	float x, y, destx, desty,speed = 2,accspeed = -2;
 	float width = 80, height = 86;
 	float finalx = 50, finaly = 50;
 	Mouse *m;
 	int status = 0;
+	
+	float acc; //Ò»¸ö¼ÓËÙ¶ÈÄ£ÄâÖØÁ¦
+	sun(IMAGE *image, Mouse *mouse, float acclerate, float inx, float iny){
+		img = image;
+		m = mouse;
+		x = inx - img->getwidth() / 2;
+		y = iny - img->getheight() / 2;
+		destx = x - rand() % 100 + 50;
+		desty = y + rand() % 20;
+		acc = acclerate;
+		status = -1;
+		accspeed = -2;
+
+	}
 	sun(IMAGE *image, Mouse *mouse){
 		img = image;
 		destx = 100 + rand() % 800;
@@ -256,7 +321,19 @@ public:
 	}
 	void draw(){
 		switch (status){
-		case 0:
+		case -1:
+			if (m->isInArea(x, y, y + height, x + width) && m->LEFTDOWN){
+				status = 1;
+			}
+			if (y <= desty){
+				accspeed += acc;
+				y += accspeed;
+				x -= (x - destx) * 0.5;
+			}
+			putimagePng(x, y , img);
+			break;
+
+		case 0: //Ì«ÑôÕı³£ÏÂÂä
 			if (m->isInArea(x, y, y + height, x + width) && m->LEFTDOWN){
 				status = 1;
 			}
@@ -265,9 +342,9 @@ public:
 			}
 			putimagePng(x, y, img);
 			break;
-		case 1:
+		case 1: //Ì«ÑôÕıÔÚ×ßÏò×óÉÏ½Ç
 			if (x <= finalx && y <= finaly){
-				status = 2;
+				status = 2; // Ì«Ñô»ØÊÕÍê³É£¨ÔÚSunlistÖĞremove£©
 			}
 			else{
 				int k = 10;
@@ -307,11 +384,14 @@ public:
 		}
 		time_cnt++;
 	}
+	void addSunflowerSun(float x, float y){
+		lst.push_back(sun(&img, m, 0.1, x, y));
+	}
 	void draw(){
 		sprintf(str_count, "%d", count);
 		setbkmode(TRANSPARENT);
 		settextcolor(BLACK);
-		outtextxy(55, 83, str_count);
+		outtextxy(55, 83, str_count);  //Êä³öÄãµ±Ç°ÓµÓĞµÄÑô¹â
 		for (auto &i : lst){
 			i.draw();
 		}
@@ -365,7 +445,7 @@ public:
 	std::list<bullet> mylst;
 	IMAGE img;
 	void addbullet(float x, float y){
-		mylst.push_back(bullet(x, y, &img));
+		mylst.push_back(bullet(x - img.getwidth() / 2, y - img.getheight() / 2, &img));
 	}
 	void testBullet(){
 		cnt++;
@@ -403,6 +483,7 @@ public:
 	List_sun *listSun;
 	List_bullet* listBullet;
 	int selectCardNum = 0;
+	card *selectCardPtr;
 	statusCounter(cardSlot *cardslot, chessBoard *chessb, List_sun *listofsun, List_bullet *listBull){
 		slot = cardslot;
 		board = chessb;
@@ -413,44 +494,38 @@ public:
 	void startup(){
 		listSun->m = &m;
 	}
-	void shootEvent(){
-		for (auto &i : board->data){
-			for (auto &j : i){
-				if (j.status == 2){
-					j.cnt++;
-					if (j.cnt == j.step){
-						listBullet->addbullet(j.getCenterX()-listBullet->width / 2,j.getCenterY() - listBullet->height / 2);
-						j.cnt = 0;
-					}
-				}
-			}
-		}
-	}
+	
 	void trackStatus(){
-		shootEvent();
+		//shootEvent();
+		//Ö²Îï±»³ÔµôµÄÂß¼­ÅĞ¶¨
 		for (int i = 0; i < 5; i++){
 			for (int j = 0; j < 9; j++){
-				if (board->data[i][j].status == 2 && board->data[i][j].blood <= 0){
+				if (board->data[i][j].status == 2 && board->data[i][j].bloodNow <= 0){
 					board->data[i][j].status = 0;
-					board->data[i][j].blood = 10;
+					board->data[i][j].bloodNow = 10;
+				}
+				if (board->data[i][j].status == 2 && board->data[i][j].bloodNow > 0){
+					board->data[i][j].eventCnt++;
+					if (board->data[i][j].eventCnt == board->data[i][j].eventStep){
+						board->data[i][j].NowPlant->action(this, board->data[i][j].getCenterX(), board->data[i][j].getCenterY());
+						board->data[i][j].eventCnt = 0;
+					}
 				}
 			}
 		}
 		switch (code)
 		{
 			
-
 		//Ñ¡Ôñ¿¨Æ¬Ö®Ç°
 		case 0:
 			for (int j = 0; j < slot->cnt; j++){
 				card * i = &slot->lst[j];
-				if (m.isInArea(i->x, i->y, i->y + i->height, i->x + i->width) && m.LEFTDOWN){
+				if (m.isInArea(i->x, i->y, i->y + i->height, i->x + i->width) && m.LEFTDOWN && listSun->count >= slot->lst[j].cost){
 					code = 1;
-					selectCardNum = i->cardID;
-					pointImg = &slot->target[j];
+					selectCardPtr = i;
 				}
 			}
-			board->clearAllTrans();
+
 			break;
 		//ĞéÑ¡¿¨Æ¬Ê±¼ä
 		case 1:
@@ -459,12 +534,13 @@ public:
 					for (int j = 0; j < 10; j++){
 						if (board->data[i][j].isInArea(m.x, m.y)){
 							if (board->data[i][j].status == 0){
-								board->data[i][j].status = 1;
-							}
-							else if (m.LEFTDOWN){
-								board->data[i][j].status = 2;
-								board->data[i][j].setImage("\images\\plant1.png");
-								code = 0;
+								selectCardPtr->pics->drawTransparent(board->data[i][j].getCenterX(), board->data[i][j].getCenterY());
+								if (m.LEFTDOWN ){
+									board->data[i][j].NowPlant = selectCardPtr;
+									board->data[i][j].status = 2;
+									code = 0;
+									listSun->count -= selectCardPtr->cost;
+								}
 							}
 						}
 						else if (board->data[i][j].status < 2){
@@ -474,8 +550,7 @@ public:
 				}
 			}
 			else{
-				putimagePng(m.x - slot->target->getwidth() / 2, m.y - slot->target->getheight() / 2, pointImg);
-				board->clearAllTrans();
+				selectCardPtr->pics->drawTransparent(m.x, m.y);
 			}
 			if (m.RIGHTDOWN){
 				code = 0;
@@ -514,6 +589,15 @@ public:
 		}
 	}
 };
+namespace plantFunctions{
+	void shootEvent(statusCounter *obj, int x, int y){ //Íã¶¹ÉäÊÖµÄ¹¦ÄÜ
+		obj->listBullet->addbullet(x, y);
+	}
+	void popSunEvent(statusCounter *obj, int x, int y){ //Ì«Ñô»¨µÄ¹¦ÄÜ
+		obj->listSun->addSunflowerSun(x, y);
+	}
+
+}
 
 namespace game{
 	IMAGE background;
@@ -525,6 +609,9 @@ namespace game{
 	List_bullet listBullet;
 	statusCounter status(&slotCard, &board, &listSun, &listBullet);
 	hitEvent hitEvt;
+	//ÊµÏÖ¼ÓÔØÖ²ÎïËùĞèµÄÍ¼Æ¬Â·¾¶
+	picturesOFcard peePics("\images\\card.png", "\images\\plant\\plant", 1);
+	picturesOFcard sunflowerPics("\images\\card.png", "\images\\sunflower\\sunflower", 8);
 	void startup(){
 		//¼ÓÔØ±³¾°Í¼Æ¬
 		loadimage(&background, _T("\images\\background.png"));
@@ -534,9 +621,13 @@ namespace game{
 		listSun.startup();
 		status.startup();
 		//¼ÓÔØ¿¨²ÛÄÚÈİ
-		for (int i = 0; i < 9; i++){
-			slotCard.addCard("\images\\card.png", "\images\\plant1.png","pea",1);
-		}
+		
+		//ÔÚ´Ë´¦¼ÓÔØÉÏÎÄµÄÍ¼Æ¬Â·¾¶ÓÃÓÚ×¼±¸Í¼Æ¬ËØ²Ä
+		slotCard.addCard(&peePics,"pea",1,10,100);
+		slotCard.addCard(&sunflowerPics, "sunflower",2,10,50);
+		slotCard.lst[0].action = plantFunctions::shootEvent;
+		slotCard.lst[1].action = plantFunctions::popSunEvent;
+
 		slotCard.startup();
 
 		//³õÊ¼»¯ÆåÅÌÍø¸ñ
@@ -557,12 +648,13 @@ namespace game{
 		listSun.sunGenerator();
 		slotCard.draw();
 		status.trackStatus();
-		listSun.draw();
-		chaoxing.randomMonsterGenerator();
-		dingding.randomMonsterGenerator();
-		board.draw();
 
+
+		board.draw();
+		listSun.draw(); //Ñô¹âÔÚÖ²ÎïºóäÖÈ¾
 		//listBullet.testBullet();
+		chaoxing.randomMonsterGenerator();
+		dingding.randomMonsterGenerator(); //¹ÖÎïÔÚÖ²ÎïºóäÖÈ¾
 		hitEvt.draw();
 		listBullet.draw();
 	}
