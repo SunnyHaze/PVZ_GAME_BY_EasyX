@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="头文件\json">
+      <UniqueIdentifier>{3e52af5c-1f78-404c-81cf-0beb2557702d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Pages">
+      <UniqueIdentifier>{f410d575-20a6-462f-924d-40e35e3b69e0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -27,20 +33,32 @@
     <ClInclude Include="EasyXPng.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="welcome.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="loading.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="game.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="pageItem.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="author.h">
+    <ClInclude Include="json\jsonxx.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\MaXiulin\Downloads\configor-master\include\configor\json.hpp">
+      <Filter>头文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="stageReader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="author.h">
+      <Filter>头文件\Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="loading.h">
+      <Filter>头文件\Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="welcome.h">
+      <Filter>头文件\Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="game.h">
+      <Filter>头文件\Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="selectStage.h">
+      <Filter>头文件\Pages</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -49,6 +67,9 @@
     </ClCompile>
     <ClCompile Include="Plants_VS_Zombie.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="json\jsonxx.cc">
+      <Filter>头文件\json</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

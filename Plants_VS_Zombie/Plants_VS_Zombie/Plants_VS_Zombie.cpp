@@ -9,7 +9,10 @@
 #include "loading.h"
 #include "game.h"
 #include "author.h"
-int activate_page = 2;
+#include "stageReader.h"
+#include "selectStage.h"
+
+int activate_page = 0;
 const int FPS = 60;
 void entry(){
 	switch (activate_page)
@@ -21,12 +24,15 @@ void entry(){
 		welcome::draw(&activate_page);
 		break;
 	case 1:
-		loading::draw(&activate_page);
+		selectStage::draw(&activate_page);
 		break;
 	case 2:
-		game::draw(&activate_page);
+		loading::draw(&activate_page);
 		break;
 	case 3:
+		game::draw(&activate_page);
+		break;
+	case 4:
 		author::draw(&activate_page);
 		break;
 	default:
@@ -38,9 +44,30 @@ void entry(){
 void startup(){
 	welcome::startup();
 	loading::startup();
+	selectStage::startup();
 	game::startup();
 	author::startup();
+/* 测试StageReader.h是否书写正确，能否读入正确的内容
+	readStage::stageInfo info;
+	info = readStage::ParseFromFile(2);
+	readStage::showStageInfo(info);*/
 }
+//核心的动画渲染循环
+void MainGenerationLoop(){
+	while (1)
+	{
+		clock_t start = clock();
+		cleardevice();
+		BeginBatchDraw();
+		entry();
+		FlushBatchDraw();
+		clock_t current;
+		while ((current = clock() - start) <= 1000 / FPS){
+			;
+		}
+	}
+}
+
 
 int main()
 {
@@ -51,19 +78,9 @@ int main()
 	//初始化所有相关资源
 	startup();
 	//主要的渲染循环
-	while (1)
-	{
-		clock_t start = clock();
-		cleardevice();
-		BeginBatchDraw();
-		entry();
-		FlushBatchDraw();
-		printf("%d\n", start);
-		clock_t current;
-		while ((current = clock() - start ) <= 1000 / FPS){
-			;
-		}
-	}
+	MainGenerationLoop();
+	
 	closegraph();
+	system("PAUSE");
 	return 0;
 }

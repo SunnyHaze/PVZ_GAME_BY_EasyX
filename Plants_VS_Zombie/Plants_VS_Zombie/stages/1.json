@@ -1,0 +1,13 @@
+{
+    "TIME": 30,
+    "monsterNumber": 2,
+    "plantNumber": 1,
+    "startSunlight": 200,
+    "plantCanUse": [
+        "pea"
+    ],
+    "monsterTime": [
+        10,
+        18
+    ]
+}

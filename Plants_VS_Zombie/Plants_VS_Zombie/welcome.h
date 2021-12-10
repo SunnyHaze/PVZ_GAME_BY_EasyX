@@ -7,7 +7,7 @@
 #include <cmath>
 #include <vector>
 #include "pageItem.h"
-
+#include "game.h"
 
 namespace welcome{
 	int * pageControl;
@@ -21,6 +21,7 @@ namespace welcome{
 	std::vector<BUTTON*> vButton;
 	//开始游戏按钮事件
 	void startButtonOnClick(){
+		game::loadStage(2);
 		*pageControl = 1;
 	}
 	//退出游戏按钮事件
@@ -28,7 +29,7 @@ namespace welcome{
 		*pageControl = -1;
 	}
 	void authorButtonOnClick(){
-		*pageControl = 3;
+		*pageControl = 4;
 	}
 	int *pagetmp; //用于在页面与主函数之间传递信息的指针
 	//初始化内容组件

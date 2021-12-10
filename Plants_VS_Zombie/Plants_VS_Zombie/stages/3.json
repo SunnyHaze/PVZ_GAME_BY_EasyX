@@ -1,0 +1,27 @@
+{
+    "TIME": 120,
+    "monsterNumber": 15,
+    "plantNumber": 2,
+    "startSunlight": 0,
+    "plantCanUse": [
+        "pea",
+        "sunflower"
+    ],
+    "monsterTime": [
+        30,
+        34,
+        38,
+        46,
+        52,
+        54,
+        60,
+        62,
+        64,
+        66,
+        72,
+        80,
+        93,
+        100,
+        111
+    ]
+}
