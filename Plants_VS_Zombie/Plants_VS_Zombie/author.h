@@ -34,7 +34,7 @@ namespace author{
 		//绑定按钮事件函数
 		vButton[0]->ButtonEvent = &returnButtonOnClick;
 		//读入背景图片
-		loadimage(&background, _T("\images\\welcome_back.png"));
+		loadimage(&background, _T("\images\\Author.png"));
 	}
 	//绘制组件
 	void draw(int *page){
