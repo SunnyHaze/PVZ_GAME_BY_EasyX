@@ -256,7 +256,7 @@ public:
 		}
 	}
 };
-
+// 是用于存放所有植物信息的类
 class chessBoard{
 public:
 	const static int rowPixY[6];
@@ -280,9 +280,11 @@ public:
 			}
 		}
 	}
+	//判定是否在植物区域内
 	bool inBoard(float x, float y){
 		return x < 970 && x > 40 && y < 726 && y > 113;
 	}
+	//清空所有的植物
 	void clearAll(){
 		for (int i = 0; i < 5; i++){
 			for (int j = 0; j < 10; j++){
@@ -293,6 +295,7 @@ public:
 		}
 	}
 };
+//怪物列表，用于管理一种怪物的所有对象
 class List_monster{
 public:
 	const static float rowPixY[5];
@@ -325,6 +328,7 @@ public:
 	void addMonster(int idxRow){
 		list.push_back(monster(1100, rowPixY[idxRow]));
 	}
+	// 用于判断是否和某物体“相碰”，主要是用于子弹碰撞逻辑和啃食逻辑
 	bool inDistance(float x1, float y1, float x2, float y2){
 		int R = 50;
 		return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) < R * R;
@@ -345,6 +349,7 @@ public:
 			timer++;
 			tmpTimer = 0;
 		}
+
 		for (auto &mons : list){
 			putimagePng(mons.x, mons.y, &img[(int)mons.cnt]);
 			mons.cnt += mons.step;
@@ -352,6 +357,7 @@ public:
 				mons.cnt = 0;
 			}
 			bool status = 0;
+			// 啃食逻辑的实现
 			for (auto & j : ptrChessboard->data){
 				for (auto &plant : j){
 					if (plant.status > 1 && inDistance(mons.x + mons.width ,mons.y + mons.height * 0.5, plant.right,(plant.up + plant.down) / 2)){
@@ -381,6 +387,7 @@ public:
 			}
 		}
 	}
+	// 清空怪物列表
 	void clear(){
 		BrainEating = false;
 		list.clear();
@@ -388,6 +395,7 @@ public:
 };
 const float List_monster::rowPixY[5] = { 90, 220, 350, 480, 630 }; //确定怪物应该渲染的y轴坐标
 
+// 阳光类 每一个阳光的信息
 class sun{
 public:
 	IMAGE *img;
@@ -461,18 +469,20 @@ public:
 	}
 };
 
+//阳光列表，用于管理所有的阳光
 class List_sun{
 public:
 	Mouse *m;
 	IMAGE img;
-	int count = 10000; //总阳光数
+	int count = 10000; //初始化时的总阳光数
 	char str_count[8];
-	int LastGenerate = 0;
-	int step = 6;
+	int LastGenerate = 0; //计算上一个阳光生成的时间
+	int step = 6;		//多少秒生成一个阳光
 	std::list<sun> lst;
 	void startup(){
 		loadimage(&img, "\images\\sun.png");
 	}
+	//天空中掉落阳光的生成器
 	void sunGenerator(){
 		if (GlobalGameSecond - LastGenerate >= step){
 			lst.push_back(sun(&img,m));
@@ -480,9 +490,11 @@ public:
 			step = 7 - rand() % 2;
 		}
 	}
+	//添加一个太阳花产生的阳光的生成器
 	void addSunflowerSun(float x, float y){
 		lst.push_back(sun(&img, m, 0.1, x, y));
 	}
+	//清空阳光列表
 	void clear(){
 		lst.clear();
 		LastGenerate = 0;
@@ -536,7 +548,7 @@ public:
 		return status == 1;
 	}
 };
-
+//子弹列表，用于管理所有的子弹
 class List_bullet{
 const static int rowPixY[6];
 public:
@@ -548,6 +560,7 @@ public:
 	void addbullet(float x, float y){
 		mylst.push_back(bullet(x - img.getwidth() / 2, y - img.getheight() / 2, &img));
 	}
+	//测试子弹列表性能的类，目前并未使用
 	void testBullet(){
 		cnt++;
 		if (cnt == step){
@@ -574,6 +587,7 @@ public:
 };
 const int List_bullet::rowPixY[6] = { 115, 240, 370, 490, 640, 750 };
 
+//鼠标事件控制器，拥有所有管理类对象的指针
 class statusCounter{
 public:
 	IMAGE shovelPoint;
@@ -597,7 +611,7 @@ public:
 		listSun->m = &m;
 		loadimage(&shovelPoint, "\images\\shovel.png");
 	}
-	
+	//进行一次鼠标事件的触发监听
 	void trackStatus(){
 		//对卡槽进行阳光判定
 		slot->statusCheck(listSun->count);
@@ -617,9 +631,10 @@ public:
 				}
 			}
 		}
+		//判定当前全局的鼠标事件状态
 		switch (code)
 		{
-		//用于铲除植物
+		//用于铲除植物的状态
 		case -1:
 			if (m.RIGHTDOWN){
 				code = 0;
@@ -635,7 +650,7 @@ public:
 			}
 			break;
 			
-		//选择卡片之前
+		//选择卡片之前“无事发生”的状态
 		case 0:
 			for (int j = 0; j < slot->cnt; j++){
 				card * i = &slot->lst[j];
@@ -649,7 +664,7 @@ public:
 			}
 
 			break;
-		//虚选卡片时间 
+		//已经选中一张卡片，目前在植物区是可以显示植物虚影的时候
 		case 1:
 			if (board->inBoard(m.x, m.y)){
 				for (int i = 0; i < 5; i++){
@@ -667,15 +682,16 @@ public:
 								}
 							}
 						}
-						else if (board->data[i][j].status < 2){
+						else if (board->data[i][j].status < 2){ //清除虚影
 							board->data[i][j].status = 0;
 						}
 					}
 				}
 			}
 			else{
-				selectCardPtr->pics->drawTransparent(m.x, m.y);
+				selectCardPtr->pics->drawTransparent(m.x, m.y); //鼠标跟随有植物虚影
 			}
+			// 如果右击，则取消所哟的特殊状态，回到“无事发生”
 			if (m.RIGHTDOWN){
 				code = 0;
 			}
@@ -688,6 +704,7 @@ const int  chessBoard::rowPixY[6] = { 113, 222, 339, 473, 600, 726 };
 const int chessBoard::colPixX[10] = { 40, 145, 242, 354, 460, 566, 673, 781, 886, 970 };
 //游戏主界面命名空间
 
+//用于管理所有怪物的类
 class monsterManger{
 public:
 	std::vector<List_monster*> mons;
@@ -711,6 +728,7 @@ public:
 				flag = true;
 			}
 		}
+		//胜利判定
 		if (GlobalQuitSecond == 0 && !flag && GlobalGameSecond >= GlobalLastMonsterSecond && GlobalStatus==0){
 			GlobalStatus = 1;
 			GlobalQuitSecond = GlobalGameSecond + 5;
@@ -721,6 +739,7 @@ public:
 		for (auto i : mons){
 			i->draw();
 		}
+		//胜利判定
 		if (GlobalGameSecond > GlobalLastMonsterSecond && GlobalGameSecond < GlobalQuitSecond && GlobalStatus == 1){
 			setcolor(RED);
 			settextstyle(40, 0, "隶书");
@@ -733,7 +752,7 @@ public:
 		}
 	}
 };
-
+//用于管理植物射出的子弹与怪物碰撞后掉血的类
 class hitEvent{
 public:
 	monsterManger *MonsterManagerPtr;
@@ -761,6 +780,7 @@ public:
 		}
 	}
 };
+//这个命名空间是所有的植物的行为的类，目前只有两个植物，所以只有他们俩有这里的函数
 namespace plantFunctions{
 	void shootEvent(statusCounter *obj, int x, int y){ //豌豆射手的功能
 		obj->listBullet->addbullet(x, y);
@@ -770,6 +790,7 @@ namespace plantFunctions{
 	}
 }
 
+//实例化的game命名空间，内部为各种类的实例化以实现整体的逻辑交互
 namespace game{
 	IMAGE background;
 	List_monster chaoxing("\images\\superstar\\superstar",rand() % 10);
@@ -826,7 +847,6 @@ namespace game{
 		
 		//加载卡槽内容
 		//在此处加载上文的图片路径用于准备图片素材
-
 		slotCard.startup();
 
 		//初始化棋盘网格
@@ -850,16 +870,16 @@ namespace game{
 			GlobalGameSecond++;
 			printf("%d", GlobalGameSecond);
 		}
-		status.m.update();
-		putimagePng(0, 0, &background);
-		listSun.sunGenerator();
-		slotCard.draw();
+		status.m.update(); //更新鼠标状态
+		putimagePng(0, 0, &background);	//输出北京
+		listSun.sunGenerator();	//生成阳光时间
+		slotCard.draw();	//绘制卡槽
 
-		board.draw();
+		board.draw();		//绘制植物区
 		listSun.draw(); //阳光在植物后渲染
 		//listBullet.testBullet();
-		MonsManage.randomMonsterGenerator();
-		hitEvt.draw();
+		MonsManage.randomMonsterGenerator();	//生成怪物区
+		hitEvt.draw();	//判定撞击事件的地方
 		listBullet.draw();
 		status.trackStatus();
 		if (GlobalQuitSecond != 0 && GlobalQuitSecond == GlobalGameSecond){

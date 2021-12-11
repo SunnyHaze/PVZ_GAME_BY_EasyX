@@ -36,9 +36,6 @@
     <ClInclude Include="pageItem.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="json\jsonxx.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="C:\Users\MaXiulin\Downloads\configor-master\include\configor\json.hpp">
       <Filter>头文件\json</Filter>
     </ClInclude>
@@ -59,6 +56,9 @@
     </ClInclude>
     <ClInclude Include="selectStage.h">
       <Filter>头文件\Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="json\jsonxx.h">
+      <Filter>头文件\json</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

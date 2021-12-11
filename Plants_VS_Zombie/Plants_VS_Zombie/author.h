@@ -17,11 +17,10 @@ namespace author{
 	IMAGE background;
 	//用于维护按钮的数组
 	std::vector<BUTTON*> vButton;
-	//开始游戏按钮事件
+	//退出游戏按钮事件
 	void returnButtonOnClick(){
 		*pageControl = 0;
 	}
-	//退出游戏按钮事件
 	int *pagetmp; //用于在页面与主函数之间传递信息的指针
 	//初始化内容组件
 	void startup(){

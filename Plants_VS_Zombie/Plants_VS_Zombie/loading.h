@@ -19,7 +19,7 @@ namespace loading{
 	void startup(){
 		loadimage(&background, _T("\images\\loading_back.png"));
 	}
-
+	//绘制从左到右的加载进度条的函数
 	void drawBar(){
 		setfillcolor(GREEN);
 		fillrectangle(WIDTH * 0.1, (HEIGHT * 0.9 - Bar), WIDTH* 0.1 + 0.8 * rate * WIDTH, HEIGHT * 0.9);

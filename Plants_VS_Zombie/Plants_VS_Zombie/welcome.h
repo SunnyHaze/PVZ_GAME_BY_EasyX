@@ -28,6 +28,7 @@ namespace welcome{
 	void exitButtonOnClick(){
 		*pageControl = -1;
 	}
+	//显示作者页按钮事件
 	void authorButtonOnClick(){
 		*pageControl = 4;
 	}

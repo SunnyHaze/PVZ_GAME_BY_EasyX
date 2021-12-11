@@ -12,8 +12,9 @@
 #include "stageReader.h"
 #include "selectStage.h"
 
-int activate_page = 0;
-const int FPS = 60;
+int activate_page = 0;	//全局控制当前页的参数
+const int FPS = 60;		//帧率
+//用于控制当前渲染哪个页面的函数
 void entry(){
 	switch (activate_page)
 	{
@@ -56,13 +57,13 @@ void startup(){
 void MainGenerationLoop(){
 	while (1)
 	{
-		clock_t start = clock();
-		cleardevice();
-		BeginBatchDraw();
-		entry();
-		FlushBatchDraw();
-		clock_t current;
-		while ((current = clock() - start) <= 1000 / FPS){
+		clock_t start = clock();	//用于控制帧率
+		cleardevice();				//清除页面
+		BeginBatchDraw();			//启动BatchDraw，此函数可以保证渲染的对象不频闪
+		entry();					//进入渲染入口
+		FlushBatchDraw();			//刷新BatchDraw，配合上面的函数使用
+		clock_t current;			//用于控制帧率
+		while ((current = clock() - start) <= 1000 / FPS){	//如果没有到达帧率要求，则不渲染下一帧
 			;
 		}
 	}
@@ -80,7 +81,7 @@ int main()
 	//主要的渲染循环
 	MainGenerationLoop();
 	
-	closegraph();
+	closegraph();	//关闭图像并退出
 	system("PAUSE");
 	return 0;
 }

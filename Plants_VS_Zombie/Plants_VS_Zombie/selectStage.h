@@ -8,7 +8,7 @@
 #include <vector>
 #include "pageItem.h"
 #include "game.h"
-//作者详情页命名空间
+//关卡选择页命名空间
 namespace selectStage{
 	int * pageControl; //用于在页面与主函数之间传递信息的指针
 	Mouse m;
@@ -20,20 +20,21 @@ namespace selectStage{
 	IMAGE background;
 	//用于维护按钮的数组
 	std::vector<BUTTON*> vButton;
+	//返回上一级的回调函数
 	void returnButtonOnClick(){
 		*pageControl = 0;
 	}
 	//关卡跳跃的回调函数
 	void gotoStage1(){
-		game::loadStage(1);
+		game::loadStage(1);	//加载关卡1信息
 		*pageControl = 2;
 	}
 	void gottostage2(){
-		game::loadStage(2);
+		game::loadStage(2); //加载关卡2信息
 		*pageControl = 2;
 	}
 	void gottostage3(){
-		game::loadStage(3);
+		game::loadStage(3); //加载关卡3信息
 		*pageControl = 2;
 	}
 	//初始化内容组件
@@ -43,7 +44,7 @@ namespace selectStage{
 		vButton.push_back(&butt_stage1);
 		vButton.push_back(&butt_stage2);
 		vButton.push_back(&butt_stage3);
-		//按钮初始化图片
+		//按钮初始化图片素材
 		for (auto &i : vButton){
 			i->startup();
 		}

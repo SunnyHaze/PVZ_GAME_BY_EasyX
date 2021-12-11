@@ -8,10 +8,10 @@
 //用于页面监听鼠标事件的鼠标类
 class Mouse{
 public:
-	ExMessage m;
-	float x, y;
-	bool LEFTDOWN = 0;
-	bool RIGHTDOWN = 0;
+	ExMessage m;		//EasyX内置的鼠标信息读取类
+	float x, y;			//鼠标的当前位置坐标
+	bool LEFTDOWN = 0;	//变量如其名
+	bool RIGHTDOWN = 0;	//变量如其名
 	void update(){
 		while (peekmessage(&m, EM_MOUSE)){
 			x = m.x;
@@ -30,7 +30,7 @@ public:
 			}
 		}
 	}
-
+	// 用于判定当前鼠标是否在该区间内的函数
 	bool isInArea(float left, float up, float down, float right){
 		if (right > x && left < x && down > y && up < y){
 			return 1;
@@ -74,13 +74,13 @@ public:
 	void draw(Mouse m){
 		switch (status)
 		{
-		case 0:
+		case 0:	// 鼠标完全不在按钮上的情况
 			putimagePng(x, y, &img[status]);
 			if (ifMouseOver(m)){
 				status = 1;
 			}
 			break;
-		case 1:
+		case 1:	// 鼠标悬停在按钮上方的情况
 			putimagePng(x, y, &img[status]);
 			if (!ifMouseOver(m)){
 				status = 0;
@@ -89,7 +89,7 @@ public:
 				status = 2;
 			}
 			break;
-		case 2:
+		case 2:	//鼠标单击按钮的情况
 			putimagePng(x, y, &img[status]);
 			if (!ifMouseOver(m)){
 				status = 0;
