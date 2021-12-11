@@ -27,6 +27,3 @@ with open(Url,"w",encoding="GB2312") as f:
                 print("您输入的{}，超过了总时间{}，请重新输入：".format(mons,times))
     data["monsterTime"] = MonsterTime.sort()
     json.dump(data,f)
-       
-            
-        
