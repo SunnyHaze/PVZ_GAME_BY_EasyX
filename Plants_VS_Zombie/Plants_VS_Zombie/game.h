@@ -204,7 +204,7 @@ public:
 	int eventStep = 200;		//触发事件的周期
 	int bloodNow = 10;			//当前血量
 	int img_cnt = 0;				//当前渲染到的图片
-	int FPS = 10;				// 多少次渲染才进行下一帧
+	int FPS = 6;				// 多少帧渲染才进行下一帧动画
 	int FPS_CNT = 0;			// 当前帧的索引
 	card *NowPlant;				//指向当前格子内管理的卡片的指针
 	block(){
@@ -654,10 +654,11 @@ public:
 		case 0:
 			for (int j = 0; j < slot->cnt; j++){
 				card * i = &slot->lst[j];
-				if (m.isInArea(i->x, i->y, i->y + i->height, i->x + i->width) && m.LEFTDOWN && listSun->count >= slot->lst[j].cost){
+				if (m.isInArea(i->x, i->y, i->y + i->height, i->x + i->width) && m.LEFTDOWN && listSun->count >= slot->lst[j].cost && slot->lst[j].status==1){
 					code = 1;
 					selectCardPtr = i;
 				}
+				//拿起铲子准备铲除植物
 				if (m.isInArea(790, 14, 82, 852) && m.LEFTDOWN){
 					code = -1;
 				}

@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include<mmsystem.h>   //音频生成
+#pragma comment(lib,"winmm.lib")
 #include "welcome.h"
 #include "loading.h"
 #include "game.h"
@@ -43,6 +45,8 @@ void entry(){
 
 //用于初始化所有相关资源的函数
 void startup(){
+	mciSendString(_T("open ./music/Grasswalk.mp3 alias music"), NULL, 0, NULL); // 播放音乐
+	mciSendString(_T("play music repeat"), NULL, 0, NULL);						// 播放音乐
 	welcome::startup();
 	loading::startup();
 	selectStage::startup();
