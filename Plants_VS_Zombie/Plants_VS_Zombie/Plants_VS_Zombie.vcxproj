@@ -86,6 +86,7 @@
     <ClInclude Include="json\jsonxx.h" />
     <ClInclude Include="loading.h" />
     <ClInclude Include="pageItem.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="welcome.h" />
@@ -99,6 +100,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Plants_VS_Zombie.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="IndexIco.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

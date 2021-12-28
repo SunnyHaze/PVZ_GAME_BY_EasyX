@@ -6,7 +6,7 @@
 #include <math.h>
 #include <time.h>
 #include<mmsystem.h>   //音频生成
-#pragma comment(lib,"winmm.lib")
+#pragma comment(lib,"winmm.lib") //播放音频所需的头文件
 #include "welcome.h"
 #include "loading.h"
 #include "game.h"
@@ -79,7 +79,7 @@ int main()
 	//初始化时间种子
 	srand(time(NULL));
 	//主要的渲染循环：
-	initgraph(1024, 768, EW_SHOWCONSOLE);
+	initgraph(1024, 768);
 	//初始化所有相关资源
 	startup();
 	//主要的渲染循环
